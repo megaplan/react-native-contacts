@@ -77,16 +77,20 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
 
     @Override
     public void onActivityResult(Activity ContactsWrapper, final int requestCode, final int resultCode, final Intent intent) {
+        if (intent != null) {
+            Uri contactUri = intent.getData();
 
-        Uri contactUri = intent.getData();
+            if (contactUri != null) {
 
-        Context context = getReactApplicationContext();
-        ContentResolver cr = context.getContentResolver();
+                Context context = getReactApplicationContext();
+                ContentResolver cr = context.getContentResolver();
 
-        ContactsProvider contactsProvider = new ContactsProvider(cr);
-        WritableMap contact = contactsProvider.getContactById(contactUri.getLastPathSegment());
+                ContactsProvider contactsProvider = new ContactsProvider(cr);
+                WritableMap contact = contactsProvider.getContactById(contactUri.getLastPathSegment());
 
-        requestCallback.invoke(null, contact);
+                requestCallback.invoke(null, contact);
+            }
+        }
     }
 
     public void onNewIntent(Intent intent) {
