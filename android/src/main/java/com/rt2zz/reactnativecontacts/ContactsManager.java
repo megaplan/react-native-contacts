@@ -22,6 +22,7 @@ import android.provider.ContactsContract.RawContacts;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 
+import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -39,7 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-public class ContactsManager extends ReactContextBaseJavaModule {
+public class ContactsManager extends ReactContextBaseJavaModule implements ActivityEventListener {
 
     private static final String PERMISSION_DENIED = "denied";
     private static final String PERMISSION_AUTHORIZED = "authorized";
@@ -50,6 +51,7 @@ public class ContactsManager extends ReactContextBaseJavaModule {
 
     public ContactsManager(ReactApplicationContext reactContext) {
         super(reactContext);
+        reactContext.addActivityEventListener(this);
     }
 
     /*
@@ -59,6 +61,36 @@ public class ContactsManager extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getAll(final Callback callback) {
         getAllContacts(callback);
+    }
+
+    @ReactMethod
+    public void getContactFromPicker(Callback callback) {
+        requestCallback = callback;
+
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+        Activity mCtx = getCurrentActivity();
+        if (intent.resolveActivity(mCtx.getPackageManager()) != null) {
+            mCtx.startActivityForResult(intent, 100);
+        }
+    }
+
+    @Override
+    public void onActivityResult(Activity ContactsWrapper, final int requestCode, final int resultCode, final Intent intent) {
+
+        Uri contactUri = intent.getData();
+
+        Context context = getReactApplicationContext();
+        ContentResolver cr = context.getContentResolver();
+
+        ContactsProvider contactsProvider = new ContactsProvider(cr);
+        WritableMap contact = contactsProvider.getContactById(contactUri.getLastPathSegment());
+
+        requestCallback.invoke(null, contact);
+    }
+
+    public void onNewIntent(Intent intent) {
+
     }
 
     /**
