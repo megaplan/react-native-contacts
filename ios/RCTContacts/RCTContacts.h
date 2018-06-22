@@ -4,4 +4,6 @@
 
 @interface RCTContacts : NSObject <RCTBridgeModule, CNContactViewControllerDelegate>
 
+@property(nonatomic, retain) RCTResponseSenderBlock callback;
+
 @end

@@ -1,4 +1,5 @@
 #import <AddressBook/AddressBook.h>
+#import <AddressBookUI/AddressBookUI.h>
 #import <UIKit/UIKit.h>
 #import "RCTContacts.h"
 #import <AssetsLibrary/AssetsLibrary.h>
@@ -16,6 +17,45 @@ RCT_EXPORT_MODULE();
              @"PERMISSION_AUTHORIZED": @"authorized",
              @"PERMISSION_UNDEFINED": @"undefined"
              };
+}
+
+RCT_EXPORT_METHOD(getContactFromPicker:(RCTResponseSenderBlock) callback)
+{
+     self.callback = callback;
+     [self launchContacts];
+}
+
+/**
+ Launch the contacts UI
+ */
+-(void) launchContacts {
+    if([CNContactPickerViewController class]) {
+        //iOS 9+
+        UIViewController *picker = [[CNContactPickerViewController alloc] init];
+        ((CNContactPickerViewController *)picker).delegate = self;
+        //Launch Contact Picker or Address Book View Controller
+        UIViewController *root = [[[UIApplication sharedApplication] delegate] window].rootViewController;
+        BOOL modalPresent = (BOOL) (root.presentedViewController);
+        if (modalPresent) {
+            UIViewController *parent = root.presentedViewController;
+            [parent presentViewController:picker animated:YES completion:nil];
+        } else {
+            [root presentViewController:picker animated:YES completion:nil];
+        }
+    }
+}
+
+#pragma mark - RN Events
+
+-(void)contactPicked:(NSDictionary *)contactData {
+    self.callback(@[[NSNull null], contactData]);
+}
+
+#pragma mark - Event handlers - iOS 9+
+
+- (void)contactPicker:(CNContactPickerViewController *)picker didSelectContact:(CNContact *)contact {
+    NSDictionary *contactDict = [self contactToDictionary: contact withThumbnails:true];
+    [self contactPicked:contactDict];
 }
 
 RCT_EXPORT_METHOD(checkPermission:(RCTResponseSenderBlock) callback)
