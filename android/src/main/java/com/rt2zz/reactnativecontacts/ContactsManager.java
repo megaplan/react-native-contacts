@@ -46,6 +46,7 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
     private static final String PERMISSION_AUTHORIZED = "authorized";
     private static final String PERMISSION_READ_CONTACTS = Manifest.permission.READ_CONTACTS;
     private static final int PERMISSION_REQUEST_CODE = 888;
+    private static final int CONTACT_REQUEST_CODE = 889;
 
     private static Callback requestCallback;
 
@@ -71,13 +72,13 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
         intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
         Activity mCtx = getCurrentActivity();
         if (intent.resolveActivity(mCtx.getPackageManager()) != null) {
-            mCtx.startActivityForResult(intent, 100);
+            mCtx.startActivityForResult(intent, CONTACT_REQUEST_CODE);
         }
     }
 
     @Override
     public void onActivityResult(Activity ContactsWrapper, final int requestCode, final int resultCode, final Intent intent) {
-        if (intent != null) {
+        if (intent != null && requestCode == CONTACT_REQUEST_CODE) {
             Uri contactUri = intent.getData();
 
             if (contactUri != null) {
