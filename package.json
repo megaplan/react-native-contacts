@@ -1,6 +1,6 @@
 {
   "name": "react-native-contacts",
-  "version": "5.0.2-megaplan.0",
+  "version": "5.0.2-megaplan.1",
   "description": "React Native Contacts (android & ios)",
   "nativePackage": true,
   "keywords": [

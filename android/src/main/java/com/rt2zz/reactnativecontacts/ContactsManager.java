@@ -87,28 +87,6 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
         }
     }
 
-    @Override
-    public void onActivityResult(Activity ContactsWrapper, final int requestCode, final int resultCode, final Intent intent) {
-        if (intent != null && requestCode == CONTACT_REQUEST_CODE) {
-            Uri contactUri = intent.getData();
-
-            if (contactUri != null) {
-
-                Context context = getReactApplicationContext();
-                ContentResolver cr = context.getContentResolver();
-
-                ContactsProvider contactsProvider = new ContactsProvider(cr);
-                WritableMap contact = contactsProvider.getContactById(contactUri.getLastPathSegment());
-
-                requestCallback.invoke(null, contact);
-            }
-        }
-    }
-
-    public void onNewIntent(Intent intent) {
-
-    }
-
     /**
      * Introduced for iOS compatibility.  Same as getAll
      *
@@ -1104,6 +1082,24 @@ public class ContactsManager extends ReactContextBaseJavaModule implements Activ
      */
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+        if (data != null && requestCode == CONTACT_REQUEST_CODE) {
+            Uri contactUri = data.getData();
+
+            if (contactUri != null) {
+
+                Context context = getReactApplicationContext();
+                ContentResolver cr = context.getContentResolver();
+
+                ContactsProvider contactsProvider = new ContactsProvider(cr);
+                WritableMap contact = contactsProvider.getContactById(contactUri.getLastPathSegment());
+
+                requestCallback.invoke(null, contact);
+            }
+
+            return;
+        }
+
+
         if (requestCode != REQUEST_OPEN_CONTACT_FORM && requestCode != REQUEST_OPEN_EXISTING_CONTACT) {
             return;
         }
